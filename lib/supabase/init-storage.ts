@@ -2,7 +2,13 @@
 
 import { createServerSupabaseClient } from "./server"
 
-export async function initializeStorage() {
+interface InitializeStorageResult {
+  success: boolean
+  message?: string
+  error?: string | Error
+}
+
+export async function initializeStorage(): Promise<InitializeStorageResult> {
   try {
     console.log("Initializing storage...")
 
@@ -11,48 +17,57 @@ export async function initializeStorage() {
     try {
       supabase = createServerSupabaseClient()
     } catch (error) {
-      console.error("Failed to create Supabase client:", error)
-      return false
+      const errorMessage = error instanceof Error ? error.message : "Unknown error creating client"
+      console.error("Failed to create Supabase client:", errorMessage)
+      return { success: false, error: errorMessage }
     }
 
     // Check if the bucket exists
     const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets()
 
     if (bucketsError) {
-      console.error("Error listing buckets:", bucketsError)
-      return false
+      const errorMessage = bucketsError.message || "Unknown error listing buckets"
+      console.error("Error listing buckets:", errorMessage)
+      return { success: false, error: errorMessage }
     }
 
     // If the model-images bucket doesn't exist, create it
     const bucketExists = buckets.some((bucket) => bucket.name === "model-images")
+    const bucketName = "model-images"
 
     if (!bucketExists) {
-      const { error: createError } = await supabase.storage.createBucket("model-images", {
+      console.log(`Bucket '${bucketName}' does not exist. Creating...`)
+      const { error: createError } = await supabase.storage.createBucket(bucketName, {
         public: true,
         fileSizeLimit: 5 * 1024 * 1024, // 5MB
         allowedMimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
       })
 
       if (createError) {
-        // Check if the error is because the bucket already exists
+        // Check if the error is because the bucket already exists (race condition?)
         if (createError.message.includes("already exists")) {
-          console.log("Bucket 'model-images' already exists")
-          return true
+          const message = `Bucket '${bucketName}' already exists (likely created concurrently).`
+          console.log(message)
+          return { success: true, message }
         }
 
-        console.error("Error creating bucket:", createError)
-        return false
+        const errorMessage = createError.message || `Unknown error creating bucket ${bucketName}`
+        console.error(`Error creating bucket '${bucketName}':`, errorMessage)
+        return { success: false, error: errorMessage }
       }
 
-      console.log("Created model-images bucket")
+      const successMessage = `Successfully created bucket '${bucketName}'.`
+      console.log(successMessage)
+      return { success: true, message: successMessage }
     } else {
-      console.log("Bucket 'model-images' already exists")
+      const message = `Bucket '${bucketName}' already exists.`
+      console.log(message)
+      return { success: true, message }
     }
 
-    return true
   } catch (error) {
-    console.error("Error initializing storage:", error)
-    return false
+    const errorMessage = error instanceof Error ? error.message : "Unknown error during storage initialization"
+    console.error("Error initializing storage:", errorMessage)
+    return { success: false, error: errorMessage }
   }
 }
-
