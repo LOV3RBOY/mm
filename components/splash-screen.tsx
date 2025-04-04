@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight } from "lucide-react"
@@ -20,6 +20,15 @@ export default function SplashScreen() {
 
     return () => clearTimeout(timer)
   }, [])
+
+  // Effect to manage body scrolling
+  useEffect(() => {
+    document.body.classList.add('overflow-hidden');
+    // Cleanup function to remove the class when the component unmounts
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount and cleanup on unmount
 
   const handleEnter = () => {
     setEntering(true)
@@ -108,4 +117,3 @@ export default function SplashScreen() {
     </div>
   )
 }
-
