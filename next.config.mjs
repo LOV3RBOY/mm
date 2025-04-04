@@ -1,3 +1,8 @@
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 let userConfig = undefined
 try {
   // try to import ESM first
@@ -27,25 +32,31 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-}
+};
 
 if (userConfig) {
   // ESM imports will have a "default" property
-  const config = userConfig.default || userConfig
-
+  const config = userConfig.default || userConfig;
   for (const key in config) {
-    if (
-      typeof nextConfig[key] === 'object' &&
-      !Array.isArray(nextConfig[key])
-    ) {
+    if (typeof nextConfig[key] === 'object' && !Array.isArray(nextConfig[key])) {
       nextConfig[key] = {
         ...nextConfig[key],
         ...config[key],
-      }
+      };
     } else {
-      nextConfig[key] = config[key]
+      nextConfig[key] = config[key];
     }
   }
 }
 
-export default nextConfig
+// Add webpack alias configuration to resolve "@/components" and other aliases
+nextConfig.webpack = (config) => {
+  config.resolve.alias = {
+    ...config.resolve.alias,
+    "@": path.resolve(__dirname),
+    "components": path.resolve(__dirname, "components")
+  };
+  return config;
+};
+
+export default nextConfig;
