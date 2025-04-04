@@ -21,14 +21,8 @@ export default function SplashScreen() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Effect to manage body scrolling
-  useEffect(() => {
-    document.body.classList.add('overflow-hidden');
-    // Cleanup function to remove the class when the component unmounts
-    return () => {
-      document.body.classList.remove('overflow-hidden');
-    };
-  }, []); // Empty dependency array ensures this runs only once on mount and cleanup on unmount
+  // Removed the useEffect hook that modified body classList,
+  // as fixed positioning on the component itself handles scroll prevention.
 
   const handleEnter = () => {
     setEntering(true)
@@ -40,7 +34,8 @@ export default function SplashScreen() {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
+    // Use fixed positioning to cover the entire viewport and prevent scrolling reliably
+    <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Liquid effect with background image */}
       <LiquidEffect
         imageUrl="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_4154-PGqg9PGBuKxLHK2TXQ2jjqQqH601cs.jpeg"
@@ -51,6 +46,7 @@ export default function SplashScreen() {
       <AnimatePresence>
         {!effectLoaded && (
           <motion.div
+            // Ensure indicator is also absolutely positioned within the fixed container
             className="absolute inset-0 z-20 flex items-center justify-center bg-black"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -65,6 +61,7 @@ export default function SplashScreen() {
       <AnimatePresence>
         {showContent && effectLoaded && (
           <motion.div
+            // Ensure content overlay is absolutely positioned within the fixed container
             className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center justify-center pb-16 md:pb-20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
