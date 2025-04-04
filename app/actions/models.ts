@@ -1,12 +1,22 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import type { Model } from "@/lib/types"
+
+// Define the Model type (replace with your actual type definition if different)
+interface Model {
+  id: string;
+  name: string;
+  description?: string;
+  // Add other properties as needed
+}
+
+// Set the base API URL directly
+const API_BASE_URL = "https://v0-modern-model-management.vercel.app";
 
 // Get all models
 export async function getModels(): Promise<Model[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/models`, {
+    const response = await fetch(`${API_BASE_URL}/api/models`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +41,7 @@ export async function getModels(): Promise<Model[]> {
 // Create a new model
 export async function createModel(model: Omit<Model, "id">): Promise<Model | null> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/models`, {
+    const response = await fetch(`${API_BASE_URL}/api/models`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -40,9 +50,15 @@ export async function createModel(model: Omit<Model, "id">): Promise<Model | nul
     })
 
     if (!response.ok) {
-      const error = await response.json()
-      console.error("Error creating model:", error)
-      throw new Error(`Failed to create model: ${error.error || "Unknown error"}`)
+      let errorMessage = "Unknown error";
+      try {
+        const error = await response.json();
+        errorMessage = error.error || JSON.stringify(error);
+      } catch (parseError) {
+        errorMessage = response.statusText;
+      }
+      console.error("Error creating model:", errorMessage);
+      throw new Error(`Failed to create model: ${errorMessage}`);
     }
 
     const { model: createdModel } = await response.json()
@@ -58,7 +74,7 @@ export async function createModel(model: Omit<Model, "id">): Promise<Model | nul
 // Delete a model
 export async function deleteModel(id: string): Promise<{ success: boolean }> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/models?id=${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/models?id=${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -66,13 +82,23 @@ export async function deleteModel(id: string): Promise<{ success: boolean }> {
     })
 
     if (!response.ok) {
-      const error = await response.json()
-      console.error("Error deleting model:", error)
-      throw new Error("Failed to delete model")
+      let errorMessage = "Unknown error";
+      try {
+        const error = await response.json();
+        errorMessage = error.error || JSON.stringify(error);
+      } catch (parseError) {
+        errorMessage = response.statusText;
+      }
+      console.error("Error deleting model:", errorMessage);
+      throw new Error(`Failed to delete model: ${errorMessage}`);
     }
 
     revalidatePath("/models")
-    return { success: true }
+    const responseBody = await response.text();
+    if (responseBody) {
+      return JSON.parse(responseBody);
+    }
+    return { success: true };
   } catch (error) {
     console.error("Unexpected error:", error)
     throw error

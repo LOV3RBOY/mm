@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
-import { useToast } from "@/components/ui/toaster"
+import { useToast } from "@/components/ui/use-toast"
 
 interface SupabaseProviderProps {
   children: React.ReactNode
