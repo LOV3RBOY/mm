@@ -97,3 +97,12 @@
   transition-duration: 150ms;
 }
 
+/* Styles to lock viewport scrolling when splash screen is active */
+html.splash-active,
+body.splash-active {
+  overflow: hidden !important;
+  /* Additional properties to potentially help enforce locking on mobile */
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}

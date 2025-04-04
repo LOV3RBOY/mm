@@ -21,8 +21,20 @@ export default function SplashScreen() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Removed the useEffect hook that modified body classList,
-  // as fixed positioning on the component itself handles scroll prevention.
+  // Effect to lock body and html scrolling while splash screen is active
+  useEffect(() => {
+    const htmlElement = document.documentElement;
+    const bodyElement = document.body;
+
+    htmlElement.classList.add('splash-active');
+    bodyElement.classList.add('splash-active');
+
+    // Cleanup function to remove the class when the component unmounts
+    return () => {
+      htmlElement.classList.remove('splash-active');
+      bodyElement.classList.remove('splash-active');
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount and cleanup on unmount
 
   const handleEnter = () => {
     setEntering(true)
