@@ -7,16 +7,8 @@ export function DashboardContent({ children, className, ...props }: DashboardCon
   // TODO: Fetch and display actual dashboard data
   return (
     <div className={cn("grid gap-6", className)} {...props}>
-      {/* Example: Placeholder for a list of items */} 
-      <div className="border rounded-lg p-4">
-        <h2 className="text-lg font-medium mb-2">Model Overview</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Displaying fetched model data here...
-        </p>
-        {/* Render actual data or children */} 
-        {children ? children : <p>No specific content provided.</p>}
-      </div>
-      {/* Add more sections as needed */}
+      {/* Render actual data or children. Placeholder shown if no children are passed. */}
+      {children ? children : <p className="text-sm text-muted-foreground">Dashboard content will appear here.</p>}
     </div>
   )
 }
