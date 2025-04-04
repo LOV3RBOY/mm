@@ -1,0 +1,8 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "github.copilot.chat.agent.thinkingTool": true,
+    "codewrx-babylon-agent.remoteModels": true,
+    "codewrx-unity-agent.remoteModels": true,
+    "codewrx-unreal-agent.remoteModels": true,
+    "github.copilot.chat.codesearch.enabled": true
+}
